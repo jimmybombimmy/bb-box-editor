@@ -1,4 +1,3 @@
-
 import { EditableBox } from "./EditableBox/EditableBox"
 
 import "./GridWorkspace.css"
@@ -11,13 +10,9 @@ interface GridWorkspaceProps {
 export function GridWorkspace(props: GridWorkspaceProps) {
   const {mouseDown, handleMouseDown} = props
 
-  // function handleMouseDown() {
-  //   // setMouseDown(true)
-  // }
-
   return (
     <main id="grid-workspace" onMouseDown={handleMouseDown}>
-      <EditableBox mouseDown={mouseDown}/>
+        <EditableBox mouseDown={mouseDown}/>
     </main>
   )
 }
