@@ -11,11 +11,18 @@ interface EditableBoxProps {
 
 export function EditableBox(props: EditableBoxProps) {
   const [isDraggable, setIsDraggable] = useState(false)
-  const mousePos = useMousePosition();  
   const [positionDifference, setPositionDifference] = useState({x: 0, y: 0})
-
+  const mousePos = useMousePosition();
+  
   const box = useRef<HTMLInputElement>(null)
   let rect = box.current?.getBoundingClientRect()
+  
+  let borderWidth = 0
+  if (box.current) {
+    borderWidth = Number(getComputedStyle(box.current).borderBlockWidth.replace("px", ""))
+  }
+
+  const {mouseDown, gridRect} = props
 
   useEffect(() => {
     if (box.current) {
@@ -34,31 +41,23 @@ export function EditableBox(props: EditableBoxProps) {
     }
   }, [isDraggable])
 
-
-  const {mouseDown, gridRect} = props
-
   function trapInGrid(xOrY: "x"|"y", event: MouseEvent) {
     const xOrYUpperCase: "X"| "Y" = xOrY.toLocaleUpperCase() as "X" | "Y"
-    const topOrLeft = xOrY == "x" ? "left" : "top"
-    const bottomOrRight = xOrY == "y" ? "right" : "bottom"
+    const heightOrWidth = xOrY == "y" ? "height" : "width"
 
     const client: "clientX" | "clientY" = `client${xOrYUpperCase}`
 
-    console.log(client, xOrY, topOrLeft, bottomOrRight)
-
     if(!rect) return 0
-    // console.log("eeee", event.clientX, mousePos[xOrY], rect.x, event.clientX - mousePos[xOrY] + rect.x, gridRect.left)
 
     if ((event[client] - mousePos[xOrY] + rect[xOrY]) < 0) {
       return 0
+    } 
+    else if (event[client] - mousePos[xOrY] + rect[xOrY] + rect[heightOrWidth] > gridRect[heightOrWidth]) {
+      return gridRect[heightOrWidth] - rect[heightOrWidth] - (borderWidth * 2)
     }
 
     return event[client] - mousePos[xOrY] + rect[xOrY]
   }
-
-  
-
-
 
   if (!mouseDown && isDraggable) {
     setIsDraggable(false)
