@@ -2,37 +2,38 @@ import { useEffect, useRef, useState } from "react"
 import useMousePosition from "../../../hooks/useMousePosition"
 
 import "./EditableBox.css"
-
-
-interface EditableBoxProps {
-  mouseDown: boolean,
-  gridRect: DOMRect
-}
+import type { EditableBoxProps, Position } from "./types"
+import { trapInGrid } from "../../../utils/trapBoxInGrid"
 
 export function EditableBox(props: EditableBoxProps) {
   const [isDraggable, setIsDraggable] = useState(false)
-  const [positionDifference, setPositionDifference] = useState({x: 0, y: 0})
-  const mousePos = useMousePosition();
+  const [positionDifference, setPositionDifference] = useState<Position>({x: 0, y: 0})
+  const mousePos: Position = useMousePosition();
   
-  const box = useRef<HTMLInputElement>(null)
-  let rect = box.current?.getBoundingClientRect()
+  const boxRef = useRef<HTMLInputElement>(null)
+  let rect: DOMRect | undefined = boxRef.current?.getBoundingClientRect()
   
   let borderWidth = 0
-  if (box.current) {
-    borderWidth = Number(getComputedStyle(box.current).borderBlockWidth.replace("px", ""))
+  if (boxRef.current) {
+    borderWidth = Number(getComputedStyle(boxRef.current).borderBlockWidth.replace("px", ""))
   }
 
   const {mouseDown, gridRect} = props
 
   useEffect(() => {
-    if (box.current) {
-      rect = box.current.getBoundingClientRect();
+    if (boxRef.current) {
+      rect = boxRef.current.getBoundingClientRect();
 
       const updatePosition = (event: MouseEvent ) => {
-        if (isDraggable && rect?.x && rect.y) {
-          setPositionDifference({ x: trapInGrid("x", event), y: trapInGrid("y", event)});
+        if (isDraggable && gridRect && rect?.x && rect.y) {
+          const gridTrapPayload = {event, mousePos, rect, gridRect, borderWidth}
+          setPositionDifference({ 
+            x: trapInGrid("x", gridTrapPayload), 
+            y: trapInGrid("y", gridTrapPayload)
+          });
         }
       };
+
       window.addEventListener("mousemove", updatePosition);
       return () => {
         window.removeEventListener("mousemove", updatePosition)
@@ -41,35 +42,13 @@ export function EditableBox(props: EditableBoxProps) {
     }
   }, [isDraggable])
 
-  function trapInGrid(xOrY: "x"|"y", event: MouseEvent) {
-    const xOrYUpperCase: "X"| "Y" = xOrY.toLocaleUpperCase() as "X" | "Y"
-    const heightOrWidth = xOrY == "y" ? "height" : "width"
-
-    const client: "clientX" | "clientY" = `client${xOrYUpperCase}`
-
-    if(!rect) return 0
-
-    if ((event[client] - mousePos[xOrY] + rect[xOrY]) < 0) {
-      return 0
-    } 
-    else if (event[client] - mousePos[xOrY] + rect[xOrY] + rect[heightOrWidth] > gridRect[heightOrWidth]) {
-      return gridRect[heightOrWidth] - rect[heightOrWidth] - (borderWidth * 2)
-    }
-
-    return event[client] - mousePos[xOrY] + rect[xOrY]
-  }
-
   if (!mouseDown && isDraggable) {
     setIsDraggable(false)
   }
 
-  function boxMouseDown() {
-    setIsDraggable(true)
-  }
-
   return (
     <>
-      <main id="editable-box" ref={box} onMouseDown={boxMouseDown} style={{left: positionDifference.x, top: positionDifference.y, position: "relative"}}>
+      <main id="editable-box" ref={boxRef} onMouseDown={() => setIsDraggable(true)} style={{left: positionDifference.x, top: positionDifference.y, position: "relative"}}>
         <h1>Box Info:</h1>
         <ul unselectable="on">
           <li>Draggable: {String(isDraggable)}</li>
@@ -80,7 +59,6 @@ export function EditableBox(props: EditableBoxProps) {
           <li>Y Dragged: {positionDifference.y} </li>
           <li>This X: {rect?.x}</li>
           <li>This Y: {rect?.y}</li>
-
         </ul>
       </main>
     </>
