@@ -5,6 +5,7 @@ import "./EditableBox.css"
 import type { EditableBoxProps, Position } from "./types"
 import { trapInGrid } from "../../../utils/trapBoxInGrid"
 import { isMouseInBox } from "../../../utils/isMouseInBox"
+import { isMouseInBounds } from "../../../utils/isMouseInBounds"
 
 export function EditableBox(props: EditableBoxProps) {
   const [isDraggable, setIsDraggable] = useState(false)
@@ -29,6 +30,12 @@ export function EditableBox(props: EditableBoxProps) {
       setMouseInBox(mouseInBoxCheck)
 
     }
+
+    // Can I make this so it's not running all of the time?
+    if (!isMouseInBounds(mousePos)) {
+      setIsDraggable(false) 
+    }
+
   }) 
 
   useEffect(() => {
@@ -36,6 +43,7 @@ export function EditableBox(props: EditableBoxProps) {
       rect = boxRef.current.getBoundingClientRect();
 
       const updatePosition = (event: MouseEvent ) => {
+
         if (isDraggable && gridRect && rect?.x && rect.y) {
           const gridTrapPayload = {event, mousePos, rect, gridRect, borderWidth}
           setPositionDifference({ 
