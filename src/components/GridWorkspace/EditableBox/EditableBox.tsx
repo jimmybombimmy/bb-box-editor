@@ -4,10 +4,12 @@ import useMousePosition from "../../../hooks/useMousePosition"
 import "./EditableBox.css"
 import type { EditableBoxProps, Position } from "./types"
 import { trapInGrid } from "../../../utils/trapBoxInGrid"
+import { isMouseInBox } from "../../../utils/isMouseInBox"
 
 export function EditableBox(props: EditableBoxProps) {
   const [isDraggable, setIsDraggable] = useState(false)
   const [positionDifference, setPositionDifference] = useState<Position>({x: 0, y: 0})
+  const [mouseInBox, setMouseInBox] = useState(false)
   const mousePos: Position = useMousePosition();
   
   const boxRef = useRef<HTMLInputElement>(null)
@@ -19,6 +21,15 @@ export function EditableBox(props: EditableBoxProps) {
   }
 
   const {mouseDown, gridRect} = props
+
+  // will seeing if mouse is inside of box actually have any use?
+  useEffect(() => {
+    if (rect) {
+      const mouseInBoxCheck = isMouseInBox(rect, mousePos)
+      setMouseInBox(mouseInBoxCheck)
+
+    }
+  }) 
 
   useEffect(() => {
     if (boxRef.current) {
@@ -36,6 +47,7 @@ export function EditableBox(props: EditableBoxProps) {
 
       window.addEventListener("mousemove", updatePosition);
       return () => {
+        setMouseInBox(false)
         window.removeEventListener("mousemove", updatePosition)
       };
       
@@ -59,6 +71,7 @@ export function EditableBox(props: EditableBoxProps) {
           <li>Y Dragged: {positionDifference.y} </li>
           <li>This X: {rect?.x}</li>
           <li>This Y: {rect?.y}</li>
+          <li>isMouseInBox + isDraggable: {String(mouseInBox)} </li>
         </ul>
       </main>
     </>
