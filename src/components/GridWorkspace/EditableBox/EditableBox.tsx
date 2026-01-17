@@ -46,8 +46,9 @@ export function EditableBox(props: EditableBoxProps) {
 
         if (isDraggable && gridRect && rect?.x && rect.y) {
           const gridTrapPayload = {event, mousePos, rect, gridRect, borderWidth}
+          console.log("window", window.scrollX, window.scrollY)
           setPositionDifference({ 
-            x: trapInGrid("x", gridTrapPayload), 
+            x: trapInGrid("x", gridTrapPayload),
             y: trapInGrid("y", gridTrapPayload)
           });
         }
