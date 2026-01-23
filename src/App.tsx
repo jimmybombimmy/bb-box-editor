@@ -11,14 +11,10 @@ function App() {
     setMouseDown(false)
   }
 
-  function handleMouseDown() {
-    setMouseDown(true)
-  }
-
   return (
     <>
       <main id="main-grid" onMouseUp={handleMouseUp}>
-        <GridWorkspace mouseDown={mouseDown} handleMouseDown={handleMouseDown} />
+        <GridWorkspace mouseDown={mouseDown} setMouseDown={setMouseDown} />
       </main>
     </>
   )
