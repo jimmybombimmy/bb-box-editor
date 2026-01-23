@@ -1,6 +1,6 @@
 export interface EditableBoxProps {
   mouseDown: boolean,
-  gridRect: DOMRect | undefined
+  gridRect: DOMRect | null
 }
 
 export interface Position {

@@ -1,18 +1,27 @@
-import { useRef } from "react"
+import { useRef, useState } from "react"
+import type { Dispatch, SetStateAction } from "react"
 import { EditableBox } from "./EditableBox/EditableBox"
 
 import "./GridWorkspace.css"
 
 interface GridWorkspaceProps {
   mouseDown: boolean,
-  handleMouseDown: () => void
+  setMouseDown: Dispatch<SetStateAction<boolean>>
 }
 
 export function GridWorkspace(props: GridWorkspaceProps) {
-  const {mouseDown, handleMouseDown} = props
+  const {mouseDown, setMouseDown} = props
 
   const thisGrid = useRef<HTMLInputElement>(null)
-  let rect = thisGrid.current?.getBoundingClientRect()
+  const [rect, setRect] = useState<DOMRect | null>(null)
+
+  function handleMouseDown(): void {
+    if (!rect && thisGrid.current) {
+      setRect(thisGrid.current?.getBoundingClientRect())
+    }
+
+    setMouseDown(true)
+  }
 
   return (
     <main id="grid-workspace" ref={thisGrid} onMouseDown={handleMouseDown}>
