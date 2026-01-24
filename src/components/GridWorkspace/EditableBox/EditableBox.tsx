@@ -4,49 +4,32 @@ import useMousePosition from "../../../hooks/useMousePosition"
 import "./EditableBox.css"
 import type { EditableBoxProps, Position } from "./types"
 import { trapInGrid } from "../../../utils/trapBoxInGrid"
-import { isMouseInBox } from "../../../utils/isMouseInBox"
 import { isMouseInBounds } from "../../../utils/isMouseInBounds"
 
+let borderWidth = 0
 export function EditableBox(props: EditableBoxProps) {
   const [isDraggable, setIsDraggable] = useState(false)
   const [positionDifference, setPositionDifference] = useState<Position>({x: 0, y: 0})
-  const [mouseInBox, setMouseInBox] = useState(false)
   const mousePos: Position = useMousePosition();
   
   const boxRef = useRef<HTMLInputElement>(null)
-  let rect: DOMRect | undefined = boxRef.current?.getBoundingClientRect()
+  const [rect, setRect] = useState<DOMRect | null>(null)
   
-  let borderWidth = 0
-  if (boxRef.current) {
-    borderWidth = Number(getComputedStyle(boxRef.current).borderBlockWidth.replace("px", ""))
-  }
-
   const {mouseDown, gridRect} = props
 
-  // will seeing if mouse is inside of box actually have any use?
   useEffect(() => {
-    if (rect) {
-      const mouseInBoxCheck = isMouseInBox(rect, mousePos)
-      setMouseInBox(mouseInBoxCheck)
-
+    if (rect && boxRef.current) {
+      borderWidth = Number(getComputedStyle(boxRef.current).borderBlockWidth.replace("px", ""))
     }
-
-    // Can I make this so it's not running all of the time?
-    if (!isMouseInBounds(mousePos)) {
-      setIsDraggable(false) 
-    }
-
-  }) 
+  }, [rect]) 
 
   useEffect(() => {
     if (boxRef.current) {
-      rect = boxRef.current.getBoundingClientRect();
-
+      setRect(boxRef.current.getBoundingClientRect())
+    
       const updatePosition = (event: MouseEvent ) => {
-
         if (isDraggable && gridRect && rect?.x && rect.y) {
           const gridTrapPayload = {event, mousePos, rect, gridRect, borderWidth}
-          console.log("window", window.scrollX, window.scrollY)
           setPositionDifference({ 
             x: trapInGrid("x", gridTrapPayload),
             y: trapInGrid("y", gridTrapPayload)
@@ -56,14 +39,14 @@ export function EditableBox(props: EditableBoxProps) {
 
       window.addEventListener("mousemove", updatePosition);
       return () => {
-        setMouseInBox(false)
         window.removeEventListener("mousemove", updatePosition)
       };
       
     }
+    // eslint-disable-next-line -- states other vars should be added below which breaks dragging functionality
   }, [isDraggable])
 
-  if (!mouseDown && isDraggable) {
+  if ((!mouseDown || !isMouseInBounds(mousePos)) && isDraggable) {
     setIsDraggable(false)
   }
 
@@ -80,7 +63,7 @@ export function EditableBox(props: EditableBoxProps) {
           <li>Y Dragged: {positionDifference.y} </li>
           <li>This X: {rect?.x}</li>
           <li>This Y: {rect?.y}</li>
-          <li>isMouseInBox + isDraggable: {String(mouseInBox)} </li>
+          <li>isMouseInBox (and Mouse Down): {String(isMouseInBounds(mousePos))} </li>
         </ul>
       </main>
     </>

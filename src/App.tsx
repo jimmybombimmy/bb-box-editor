@@ -12,11 +12,9 @@ function App() {
   }
 
   return (
-    <>
-      <main id="main-grid" onMouseUp={handleMouseUp}>
-        <GridWorkspace mouseDown={mouseDown} setMouseDown={setMouseDown} />
-      </main>
-    </>
+    <main id="main-grid" onMouseUp={handleMouseUp}>
+      <GridWorkspace mouseDown={mouseDown} setMouseDown={setMouseDown} />
+    </main>
   )
 }
 
