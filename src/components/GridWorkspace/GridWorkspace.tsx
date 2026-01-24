@@ -12,19 +12,19 @@ interface GridWorkspaceProps {
 export function GridWorkspace(props: GridWorkspaceProps) {
   const {mouseDown, setMouseDown} = props
 
-  const thisGrid = useRef<HTMLInputElement>(null)
+  const gridRef = useRef<HTMLInputElement>(null)
   const [rect, setRect] = useState<DOMRect | null>(null)
 
   function handleMouseDown(): void {
-    if (!rect && thisGrid.current) {
-      setRect(thisGrid.current?.getBoundingClientRect())
+    if (gridRef.current) {
+      setRect(gridRef.current?.getBoundingClientRect())
     }
 
     setMouseDown(true)
   }
 
   return (
-    <main id="grid-workspace" ref={thisGrid} onMouseDown={handleMouseDown}>
+    <main id="grid-workspace" ref={gridRef} onMouseDown={handleMouseDown}>
       <EditableBox mouseDown={mouseDown} gridRect={rect}/> : <></>
     </main>
   )
