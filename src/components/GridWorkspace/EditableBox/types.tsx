@@ -8,8 +8,8 @@ export interface Position {
   y: number
 }
 
-export type XOrYLC = "x" | "y"
-export type XOrYUC = "X" | "Y"
+export type AxisLC = "x" | "y"
+export type AxisUC = "X" | "Y"
 
 export interface GridTrapPayload {
   event: MouseEvent, 
