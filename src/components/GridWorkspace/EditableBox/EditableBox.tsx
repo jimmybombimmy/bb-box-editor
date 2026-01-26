@@ -3,7 +3,7 @@ import useMousePosition from "../../../hooks/useMousePosition"
 
 import "./EditableBox.css"
 import type { EditableBoxProps, Position } from "./types"
-import { moveBoxWithinGridByAxis } from "../../../utils/trapBoxInGrid"
+import { moveBoxWithinGridByAxis } from "../../../utils/moveBoxWithinGridByAxis"
 import { isMouseInBounds } from "../../../utils/isMouseInBounds"
 
 let borderWidth = 0
