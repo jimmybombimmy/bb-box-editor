@@ -3,19 +3,20 @@ import useMousePosition from "../../../hooks/useMousePosition"
 
 import "./EditableBox.css"
 import type { EditableBoxProps, Position } from "./types"
-import { trapInGrid } from "../../../utils/trapBoxInGrid"
+import { moveBoxWithinGridByAxis } from "../../../utils/trapBoxInGrid"
 import { isMouseInBounds } from "../../../utils/isMouseInBounds"
 
 let borderWidth = 0
 export function EditableBox(props: EditableBoxProps) {
+  const {mouseDown, gridRect} = props
+
   const [isDraggable, setIsDraggable] = useState(false)
   const [positionDifference, setPositionDifference] = useState<Position>({x: 0, y: 0})
   const mousePos: Position = useMousePosition();
   
   const boxRef = useRef<HTMLInputElement>(null)
   const [rect, setRect] = useState<DOMRect | null>(null)
-  
-  const {mouseDown, gridRect} = props
+
 
   useEffect(() => {
     if (rect && boxRef.current) {
@@ -29,10 +30,10 @@ export function EditableBox(props: EditableBoxProps) {
     
       const updatePosition = (event: MouseEvent ) => {
         if (isDraggable && gridRect && rect?.x && rect.y) {
-          const gridTrapPayload = {event, mousePos, rect, gridRect, borderWidth}
+          const moveBoxPayload = {event, mousePos, rect, gridRect, borderWidth}
           setPositionDifference({ 
-            x: trapInGrid("x", gridTrapPayload),
-            y: trapInGrid("y", gridTrapPayload)
+            x: moveBoxWithinGridByAxis("x", moveBoxPayload),
+            y: moveBoxWithinGridByAxis("y", moveBoxPayload)
           });
         }
       };
