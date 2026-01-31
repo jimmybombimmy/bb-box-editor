@@ -15,10 +15,11 @@ export function moveBoxWithinGridByAxis(axisLC: AxisLC, {event, mousePos, rect, 
     return 0
   } 
 
+
   // prevent box leaking from bottom and right
   else if (gridRect && event[client] - mousePos[axisLC] + rect[axisLC] + rect[heightOrWidth] > gridRect[heightOrWidth] - window[scroll] - (borderWidth * 2)) {
-    return gridRect[heightOrWidth] - rect[heightOrWidth] - (borderWidth * 2)
+    return gridRect[heightOrWidth] - rect[heightOrWidth] - (borderWidth * 2) - gridRect[axisLC]
   }
 
-  return event[client] - mousePos[axisLC] + rect[axisLC] + window[scroll]
+  return event[client] - mousePos[axisLC] + rect[axisLC] + window[scroll] - gridRect[axisLC]
 }
