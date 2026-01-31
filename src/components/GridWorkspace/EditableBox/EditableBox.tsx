@@ -27,7 +27,11 @@ export function EditableBox(props: EditableBoxProps) {
   useEffect(() => {
     if (boxRef.current) {
       setRect(boxRef.current.getBoundingClientRect())
-    
+
+      // const updateBoxSize = (event: MouseEvent) => {
+      //
+      // }   
+      
       const updatePosition = (event: MouseEvent ) => {
         if (isDraggable && gridRect && rect?.x && rect.y) {
           const moveBoxPayload = {event, mousePos, rect, gridRect, borderWidth}
@@ -38,9 +42,22 @@ export function EditableBox(props: EditableBoxProps) {
         }
       };
 
-      window.addEventListener("mousemove", updatePosition);
+      const dragOrResizeBox = (event: MouseEvent) => {
+
+          // Add conditional logic to determine whether resizable or draggable
+          
+          // if close to edges (or corners, later)
+          // updateBoxSize(event)
+
+          // if not close to edges
+          updatePosition(event)
+
+
+      }
+
+      window.addEventListener("mousemove", dragOrResizeBox);
       return () => {
-        window.removeEventListener("mousemove", updatePosition)
+        window.removeEventListener("mousemove", dragOrResizeBox)
       };
       
     }
