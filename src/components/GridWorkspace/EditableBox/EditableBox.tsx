@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState } from "react"
-import useMousePosition from "../../../hooks/useMousePosition"
 
 import "./EditableBox.css"
+
+import useMousePosition from "../../../hooks/useMousePosition"
+import useScrollPosition from "../../../hooks/useScrollPosition"
+
 import type { EditableBoxProps, Position } from "./types"
 import { moveBoxWithinGridByAxis } from "../../../utils/moveBoxWithinGridByAxis"
 import { isMouseInBounds } from "../../../utils/isMouseInBounds"
@@ -9,28 +12,32 @@ import { isMouseInBounds } from "../../../utils/isMouseInBounds"
 let borderWidth = 0
 export function EditableBox(props: EditableBoxProps) {
   const {mouseDown, gridRect} = props
-
   const [isDraggable, setIsDraggable] = useState(false)
   const [positionDifference, setPositionDifference] = useState<Position>({x: 0, y: 0})
+  const [manuallyUpdatedScrollPos, setManuallyUpdatedScrollPos] = useState<Position>({x: 0, y: 0})
+
+  const scrollPos: Position = useScrollPosition();
   const mousePos: Position = useMousePosition();
   
   const boxRef = useRef<HTMLInputElement>(null)
   const [rect, setRect] = useState<DOMRect | null>(null)
-
 
   useEffect(() => {
     if (rect && boxRef.current) {
       borderWidth = Number(getComputedStyle(boxRef.current).borderBlockWidth.replace("px", ""))
     }
   }, [rect]) 
-
+  
   useEffect(() => {
     if (boxRef.current) {
       setRect(boxRef.current.getBoundingClientRect())
-    
+      setManuallyUpdatedScrollPos({x: window.scrollX, y: window.scrollY})
+      
       const updatePosition = (event: MouseEvent ) => {
         if (isDraggable && gridRect && rect?.x && rect.y) {
-          const moveBoxPayload = {event, mousePos, rect, gridRect, borderWidth}
+          const scrollComp = {x: scrollPos.x - manuallyUpdatedScrollPos.x, y: scrollPos.y - manuallyUpdatedScrollPos.y }
+          const moveBoxPayload = {event, mousePos, rect, gridRect, borderWidth, scrollComp}
+
           setPositionDifference({ 
             x: moveBoxWithinGridByAxis("x", moveBoxPayload),
             y: moveBoxWithinGridByAxis("y", moveBoxPayload)
@@ -46,7 +53,7 @@ export function EditableBox(props: EditableBoxProps) {
     }
     // eslint-disable-next-line -- states other vars should be added below which breaks dragging functionality
   }, [isDraggable])
-
+  
   if ((!mouseDown || !isMouseInBounds(mousePos)) && isDraggable) {
     setIsDraggable(false)
   }
