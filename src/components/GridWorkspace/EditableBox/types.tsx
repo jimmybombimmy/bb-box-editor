@@ -16,5 +16,6 @@ export interface GridTrapPayload {
   mousePos: Position, 
   rect: DOMRect, 
   gridRect: DOMRect, 
-  borderWidth: number
+  borderWidth: number,
+  scrollComp: Position
 }
