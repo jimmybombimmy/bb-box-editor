@@ -11,6 +11,8 @@ export interface Position {
 export type AxisLC = "x" | "y"
 export type AxisUC = "X" | "Y"
 
+export type Side = 'top' | 'bottom' | 'left' | 'right'
+
 export interface GridTrapPayload {
   event: MouseEvent, 
   mousePos: Position, 
@@ -18,4 +20,9 @@ export interface GridTrapPayload {
   gridRect: DOMRect, 
   borderWidth: number,
   scrollComp: Position
+}
+
+export interface DraggableBoxPositionCheckPayload { 
+  mousePos: Position, 
+  rect: DOMRect, 
 }

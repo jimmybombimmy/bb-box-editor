@@ -5,9 +5,10 @@ import "./EditableBox.css"
 import useMousePosition from "../../../hooks/useMousePosition"
 import useScrollPosition from "../../../hooks/useScrollPosition"
 
-import type { EditableBoxProps, Position } from "./types"
+import type { DraggableBoxPositionCheckPayload, EditableBoxProps, Position, Side } from "./types"
 import { moveBoxWithinGridByAxis } from "../../../utils/moveBoxWithinGridByAxis"
 import { isMouseInBounds } from "../../../utils/isMouseInBounds"
+import { draggableBoxPositionCheck } from "../../../utils/draggableBoxPositionCheck"
 
 let borderWidth = 0
 export function EditableBox(props: EditableBoxProps) {
@@ -52,9 +53,11 @@ export function EditableBox(props: EditableBoxProps) {
 
       const dragOrResizeBox = (event: MouseEvent) => {
         // Add conditional logic to determine whether resizable or draggable
-          if (rect) {
+          if (rect && isDraggable) {
+            const draggablePositionCheckPayload: DraggableBoxPositionCheckPayload = {mousePos, rect}
+            const draggableSides: Side[] = draggableBoxPositionCheck(draggablePositionCheckPayload)
             
-            if (mousePos.x > rect?.x - 20 && mousePos.x < rect?.x + 20 && isDraggable ) {
+            if (draggableSides.includes("left")) {
               // setPositionDifference({x: 0, y: 0})
               const width = rect.width
               const mousePosAtStart = mousePos.x
@@ -63,7 +66,7 @@ export function EditableBox(props: EditableBoxProps) {
               const dragDifference = width + (mousePosAtStart - event.clientX)
 
               setBoxSize({x: dragDifference, y: 300})
-              console.log("positiondiffX", positionDifference.x, initialPosition, dragDifference)
+              // console.log("positiondiffX", positionDifference.x, initialPosition, dragDifference)
               setPositionDifference({x: initialPosition - dragDifference + width, y: positionDifference.y })
             } else {
               updatePosition(event)
