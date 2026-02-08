@@ -15,6 +15,7 @@ export function EditableBox(props: EditableBoxProps) {
   const [isDraggable, setIsDraggable] = useState(false)
   const [positionDifference, setPositionDifference] = useState<Position>({x: 0, y: 0})
   const [manuallyUpdatedScrollPos, setManuallyUpdatedScrollPos] = useState<Position>({x: 0, y: 0})
+  const [boxSize, setBoxSize] = useState<Position>({x: 300, y: 300})
 
   const scrollPos: Position = useScrollPosition();
   const mousePos: Position = useMousePosition();
@@ -50,15 +51,32 @@ export function EditableBox(props: EditableBoxProps) {
       };
 
       const dragOrResizeBox = (event: MouseEvent) => {
+        // Add conditional logic to determine whether resizable or draggable
+          if (rect) {
+            
+            if (mousePos.x > rect?.x - 20 && mousePos.x < rect?.x + 20 && isDraggable ) {
+              // setPositionDifference({x: 0, y: 0})
+              const width = rect.width
+              const mousePosAtStart = mousePos.x
+              const initialPosition = positionDifference.x
 
-          // Add conditional logic to determine whether resizable or draggable
-          
-          // if close to edges (or corners, later)
-          // updateBoxSize(event)
+              const dragDifference = width + (mousePosAtStart - event.clientX)
 
-          // if not close to edges
-          updatePosition(event)
-
+              setBoxSize({x: dragDifference, y: 300})
+              console.log("positiondiffX", positionDifference.x, initialPosition, dragDifference)
+              setPositionDifference({x: initialPosition - dragDifference + width, y: positionDifference.y })
+            } else {
+              updatePosition(event)
+            }
+              
+          }
+            
+            
+            // if close to edges (or corners, later)
+            // updateBoxSize(event)
+            
+            // if not close to edges
+            
 
       }
 
@@ -76,7 +94,7 @@ export function EditableBox(props: EditableBoxProps) {
   }
 
   return (
-    <main id="editable-box" ref={boxRef} onMouseDown={() => setIsDraggable(true)} style={{left: positionDifference.x, top: positionDifference.y, position: "relative"}}>
+    <main id="editable-box" ref={boxRef} onMouseDown={() => setIsDraggable(true)} style={{left: positionDifference.x, top: positionDifference.y, position: "relative", width: `${boxSize.x}px`, height: `${boxSize.y}px`}}>
       <h1>Box Info:</h1>
       <ul unselectable="on">
         <li>Draggable: {String(isDraggable)} </li>
