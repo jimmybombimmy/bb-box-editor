@@ -13,6 +13,8 @@ export type AxisUC = "X" | "Y"
 
 export type Side = 'top' | 'bottom' | 'left' | 'right'
 
+export type ClientByAxis = 'clientX' | 'clientY'
+
 export interface GridTrapPayload {
   event: MouseEvent, 
   mousePos: Position, 

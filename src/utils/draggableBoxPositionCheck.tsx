@@ -1,6 +1,6 @@
 import type { DraggableBoxPositionCheckPayload, Side } from "../components/GridWorkspace/EditableBox/types"
 
-const pixelBuffer = 30
+const pixelBuffer = 50
 
 function dragInRangeCheck(value: number, target: number) {
   return value > target - pixelBuffer && value < target + pixelBuffer

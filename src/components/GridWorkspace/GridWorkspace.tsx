@@ -25,7 +25,7 @@ export function GridWorkspace(props: GridWorkspaceProps) {
 
   return (
     <main id="grid-workspace" ref={gridRef} onMouseDown={handleMouseDown}>
-      <EditableBox mouseDown={mouseDown} gridRect={rect}/> : <></>
+      <EditableBox mouseDown={mouseDown} gridRect={rect}/>
     </main>
   )
 }

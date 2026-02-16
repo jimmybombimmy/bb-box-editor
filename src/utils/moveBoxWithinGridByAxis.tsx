@@ -1,11 +1,11 @@
-import type { GridTrapPayload, AxisLC, AxisUC } from "../components/GridWorkspace/EditableBox/types"
+import type { GridTrapPayload, AxisLC, AxisUC, ClientByAxis } from "../components/GridWorkspace/EditableBox/types"
 
 export function moveBoxWithinGridByAxis(axisLC: AxisLC, {event, mousePos, rect, gridRect, borderWidth, scrollComp}: GridTrapPayload ): number {
 
   const heightOrWidth = axisLC == "y" ? "height" : "width"
   const axisUC = axisLC.toUpperCase() as AxisUC
 
-  const client = `client${axisUC}` as const
+  const client: ClientByAxis = `client${axisUC}`
 
   if(!rect) return 0
 

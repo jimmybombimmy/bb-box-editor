@@ -5,7 +5,7 @@ import "./EditableBox.css"
 import useMousePosition from "../../../hooks/useMousePosition"
 import useScrollPosition from "../../../hooks/useScrollPosition"
 
-import type { DraggableBoxPositionCheckPayload, EditableBoxProps, Position, Side } from "./types"
+import type { AxisLC, AxisUC, ClientByAxis, DraggableBoxPositionCheckPayload, EditableBoxProps, Position, Side } from "./types"
 import { moveBoxWithinGridByAxis } from "../../../utils/moveBoxWithinGridByAxis"
 import { isMouseInBounds } from "../../../utils/isMouseInBounds"
 import { draggableBoxPositionCheck } from "../../../utils/draggableBoxPositionCheck"
@@ -56,31 +56,58 @@ export function EditableBox(props: EditableBoxProps) {
           if (rect && isDraggable) {
             const draggablePositionCheckPayload: DraggableBoxPositionCheckPayload = {mousePos, rect}
             const draggableSides: Side[] = draggableBoxPositionCheck(draggablePositionCheckPayload)
-            
-            if (draggableSides.includes("left")) {
-              // setPositionDifference({x: 0, y: 0})
-              const width = rect.width
-              const mousePosAtStart = mousePos.x
-              const initialPosition = positionDifference.x
+            // console.log(draggableSides)
 
-              const dragDifference = width + (mousePosAtStart - event.clientX)
+            // This function may need to be an array that handles both sides at once
+            // there appears to be an issue with two sides not being updated at once - probably due to quick size updates overlapping
+            const resizeBoxFromAxis = (side: Side)  => {
+              console.log(side)
+              let axis: AxisLC;
+              let axisUC: AxisUC;
+              let axisSize: number;
+              
+              let dragDifference = {x: boxSize.x, y: boxSize.y}
+              
+              if (side.match(/left|right/)) {
+                axis = "x"
+                axisUC = "X"
+                axisSize = rect.width
+                    
+              } else {
+                axis = "y"
+                axisUC = "Y"
+                axisSize = rect.height
+              }
+              
+              let initialMousePos = mousePos[axis]
+              let initialPosition = positionDifference[axis]
+              
+              
+              const client: ClientByAxis = `client${axisUC}`
 
-              setBoxSize({x: dragDifference, y: 300})
-              // console.log("positiondiffX", positionDifference.x, initialPosition, dragDifference)
-              setPositionDifference({x: initialPosition - dragDifference + width, y: positionDifference.y })
+              if (side.match(/left|top/)) {
+                dragDifference[axis] = axisSize + (initialMousePos - event[client])
+                setBoxSize({x: dragDifference.x, y: dragDifference.y})
+
+                const positionDifferenceCopy = {...positionDifference}
+                positionDifferenceCopy[axis] = initialPosition - dragDifference[axis] + axisSize - (borderWidth * 2)
+                setPositionDifference(positionDifferenceCopy)
+
+              } else {
+                dragDifference[axis] = axisSize - (initialMousePos - event[client])
+                // console.log("dragDiff", dragDifference)
+                setBoxSize({x: dragDifference.x, y: dragDifference.y})
+              }
+            }
+          
+            if (draggableSides.length > 0) {
+              draggableSides.forEach((s) => {
+                resizeBoxFromAxis(s)
+              })
             } else {
               updatePosition(event)
-            }
-              
-          }
-            
-            
-            // if close to edges (or corners, later)
-            // updateBoxSize(event)
-            
-            // if not close to edges
-            
-
+            }          
+          }           
       }
 
       window.addEventListener("mousemove", dragOrResizeBox);
