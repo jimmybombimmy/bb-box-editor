@@ -1,6 +1,6 @@
-import type { GridTrapPayload, AxisLC, AxisUC, ClientByAxis } from "../components/GridWorkspace/EditableBox/types"
+import type { MoveBoxPayload, AxisLC, AxisUC, ClientByAxis } from "../components/GridWorkspace/EditableBox/types"
 
-export function moveBoxWithinGridByAxis(axisLC: AxisLC, {event, mousePos, rect, gridRect, borderWidth, scrollComp}: GridTrapPayload ): number {
+export function moveBoxWithinGridByAxis(axisLC: AxisLC, {event, mousePos, rect, gridRect, borderWidth, scrollComp }: MoveBoxPayload ): number {
 
   const heightOrWidth = axisLC == "y" ? "height" : "width"
   const axisUC = axisLC.toUpperCase() as AxisUC

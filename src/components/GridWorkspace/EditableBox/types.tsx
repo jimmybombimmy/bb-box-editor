@@ -15,13 +15,24 @@ export type Side = 'top' | 'bottom' | 'left' | 'right'
 
 export type ClientByAxis = 'clientX' | 'clientY'
 
-export interface GridTrapPayload {
+export interface MoveBoxPayload {
   event: MouseEvent, 
   mousePos: Position, 
   rect: DOMRect, 
   gridRect: DOMRect, 
   borderWidth: number,
   scrollComp: Position
+}
+
+export interface ResizeBoxPayload {
+  event: MouseEvent,
+  mousePos: Position,
+  rect: DOMRect,
+  gridRect: DOMRect,
+  borderWidth: number,
+  boxSize: Position,
+  positionDifference: Position,
+  sides: Side[]
 }
 
 export interface DraggableBoxPositionCheckPayload { 

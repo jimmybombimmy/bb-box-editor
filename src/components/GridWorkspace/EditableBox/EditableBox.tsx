@@ -5,10 +5,11 @@ import "./EditableBox.css"
 import useMousePosition from "../../../hooks/useMousePosition"
 import useScrollPosition from "../../../hooks/useScrollPosition"
 
-import type { AxisLC, AxisUC, ClientByAxis, DraggableBoxPositionCheckPayload, EditableBoxProps, Position, Side } from "./types"
+import type { DraggableBoxPositionCheckPayload, EditableBoxProps, MoveBoxPayload, Position, ResizeBoxPayload, Side } from "./types"
 import { moveBoxWithinGridByAxis } from "../../../utils/moveBoxWithinGridByAxis"
 import { isMouseInBounds } from "../../../utils/isMouseInBounds"
 import { draggableBoxPositionCheck } from "../../../utils/draggableBoxPositionCheck"
+import { resizeBoxWithinGridBySides } from "../../../utils/resizeBox"
 
 let borderWidth = 0
 export function EditableBox(props: EditableBoxProps) {
@@ -34,16 +35,12 @@ export function EditableBox(props: EditableBoxProps) {
     if (boxRef.current) {
       setRect(boxRef.current.getBoundingClientRect())
       setManuallyUpdatedScrollPos({x: window.scrollX, y: window.scrollY})
-
-      // const updateBoxSize = (event: MouseEvent) => {
-      //
-      // }   
       
       const updatePosition = (event: MouseEvent ) => {
         if (isDraggable && gridRect && rect?.x && rect.y) {
           const scrollComp = {x: scrollPos.x - manuallyUpdatedScrollPos.x, y: scrollPos.y - manuallyUpdatedScrollPos.y }
-          const moveBoxPayload = {event, mousePos, rect, gridRect, borderWidth, scrollComp}
-
+          const moveBoxPayload: MoveBoxPayload = {event, mousePos, rect, gridRect, borderWidth, scrollComp}
+          
           setPositionDifference({ 
             x: moveBoxWithinGridByAxis("x", moveBoxPayload),
             y: moveBoxWithinGridByAxis("y", moveBoxPayload)
@@ -51,38 +48,24 @@ export function EditableBox(props: EditableBoxProps) {
         }
       };
 
+      const updateBoxSize = (event: MouseEvent, sides: Side[]) => {
+        if (rect && gridRect) {
+          const resizeBoxPayload: ResizeBoxPayload = {event, mousePos, rect, gridRect, borderWidth, boxSize, positionDifference, sides}
+          const {dragDifference, positionDifferenceCopy} = resizeBoxWithinGridBySides(resizeBoxPayload)
+
+          setBoxSize(dragDifference)
+          setPositionDifference(positionDifferenceCopy)
+        }
+      }   
+      
       const dragOrResizeBox = (event: MouseEvent) => {
           if (rect && isDraggable) {
             const draggablePositionCheckPayload: DraggableBoxPositionCheckPayload = {mousePos, rect}
             const draggableSides: Side[] = draggableBoxPositionCheck(draggablePositionCheckPayload)
-
-            const resizeBox = (sides: Side[]) => {
-              const dragDifference: Position = {...boxSize}
-              const positionDifferenceCopy: Position = {...positionDifference}
-              let positionDifferenceChanged: boolean = false
-
-              if (sides.includes("left")) {
-                dragDifference.x = rect.width + (mousePos.x - event.clientX)
-                positionDifferenceCopy.x = positionDifference.x - dragDifference.x + rect.width - (borderWidth * 2)
-                positionDifferenceChanged = true
-              } else if (sides.includes("right")) {
-                dragDifference.x = rect.width - (mousePos.x - event.clientX)
-              }
-              if (sides.includes("top")) {
-                dragDifference.y = rect.height + (mousePos.y - event.clientY)
-                positionDifferenceCopy.y = positionDifference.y - dragDifference.y + rect.height - (borderWidth * 2)
-                positionDifferenceChanged = true
-              } else if (sides.includes("bottom")) {
-                dragDifference.y = rect.height - (mousePos.y - event.clientY)
-              }
-              
-              setBoxSize(dragDifference)
-              if (positionDifferenceChanged) setPositionDifference(positionDifferenceCopy)
-
-            }
           
             if (draggableSides.length > 0) {
-              resizeBox(draggableSides)
+              // resizeBox(draggableSides)
+              updateBoxSize(event, draggableSides)
             } else {
               updatePosition(event)
             }          
