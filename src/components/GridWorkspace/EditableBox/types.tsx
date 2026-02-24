@@ -32,7 +32,8 @@ export interface ResizeBoxPayload {
   borderWidth: number,
   boxSize: Position,
   positionDifference: Position,
-  sides: Side[]
+  sides: Side[],
+  scrollComp: Position
 }
 
 export interface DraggableBoxPositionCheckPayload { 
