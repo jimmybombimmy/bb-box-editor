@@ -39,4 +39,5 @@ export interface ResizeBoxPayload {
 export interface DraggableBoxPositionCheckPayload { 
   mousePos: Position, 
   rect: DOMRect, 
+  scrollComp: Position
 }

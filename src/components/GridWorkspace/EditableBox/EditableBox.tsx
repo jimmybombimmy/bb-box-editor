@@ -60,17 +60,22 @@ export function EditableBox(props: EditableBoxProps) {
       }   
       
       const dragOrResizeBox = (event: MouseEvent) => {
-          if (rect && isDraggable) {
-            const draggablePositionCheckPayload: DraggableBoxPositionCheckPayload = {mousePos, rect}
-            const draggableSides: Side[] = draggableBoxPositionCheck(draggablePositionCheckPayload)
-            scrollComp = {x: scrollPos.x - manuallyUpdatedScrollPos.x, y: scrollPos.y - manuallyUpdatedScrollPos.y }
+        if (rect && isDraggable) {
+          scrollComp = {x: scrollPos.x - manuallyUpdatedScrollPos.x, y: scrollPos.y - manuallyUpdatedScrollPos.y }
+          
+          const draggablePositionCheckPayload: DraggableBoxPositionCheckPayload = {mousePos, rect, scrollComp}
+          const draggableSides: Side[] = draggableBoxPositionCheck(draggablePositionCheckPayload)
 
-            if (draggableSides.length > 0) {
-              updateBoxSize(event, draggableSides)
-            } else {
-              updatePosition(event)
-            }          
-          }           
+          if (scrollComp.x || scrollComp.y) {
+            setBoxSize(boxSize)
+          }
+
+          if (draggableSides.length > 0) {
+            updateBoxSize(event, draggableSides)
+          } else {
+            updatePosition(event)
+          }          
+        }           
       }
 
       window.addEventListener("mousemove", dragOrResizeBox);
