@@ -10,6 +10,7 @@ import { moveBoxWithinGridByAxis } from "../../../utils/moveBoxWithinGridByAxis"
 import { isMouseInBounds } from "../../../utils/isMouseInBounds"
 import { draggableBoxPositionCheck } from "../../../utils/draggableBoxPositionCheck"
 import { resizeBoxWithinGrid } from "../../../utils/resizeBoxWithinGrid"
+import { preventBoxOverShrinkage } from "../../../utils/preventBoxOverShrinkage"
 
 let borderWidth = 0
 export function EditableBox(props: EditableBoxProps) {
@@ -54,7 +55,12 @@ export function EditableBox(props: EditableBoxProps) {
           const resizeBoxPayload: ResizeBoxPayload = {event, mousePos, rect, gridRect, borderWidth, boxSize, positionDifference, sides, scrollComp}
           const {dragDifference, positionDifferenceCopy} = resizeBoxWithinGrid(resizeBoxPayload)
 
-          setBoxSize(dragDifference)
+          // Issue found when preventing over shrinkage in certain sides:
+          // - Top: Will move right
+          // - Left: Will move down
+          const notTooSmallBoxSize = preventBoxOverShrinkage(dragDifference)
+
+          setBoxSize(notTooSmallBoxSize)
           setPositionDifference(positionDifferenceCopy)
         }
       }   
@@ -62,7 +68,7 @@ export function EditableBox(props: EditableBoxProps) {
       const dragOrResizeBox = (event: MouseEvent) => {
         if (rect && isDraggable) {
           scrollComp = {x: scrollPos.x - manuallyUpdatedScrollPos.x, y: scrollPos.y - manuallyUpdatedScrollPos.y }
-          
+
           const draggablePositionCheckPayload: DraggableBoxPositionCheckPayload = {mousePos, rect, scrollComp}
           const draggableSides: Side[] = draggableBoxPositionCheck(draggablePositionCheckPayload)
 
