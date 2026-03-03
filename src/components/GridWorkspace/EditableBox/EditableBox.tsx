@@ -55,13 +55,26 @@ export function EditableBox(props: EditableBoxProps) {
           const resizeBoxPayload: ResizeBoxPayload = {event, mousePos, rect, gridRect, borderWidth, boxSize, positionDifference, sides, scrollComp}
           const {dragDifference, positionDifferenceCopy} = resizeBoxWithinGrid(resizeBoxPayload)
 
-          // Issue found when preventing over shrinkage in certain sides:
-          // - Top: Will move right
-          // - Left: Will move down
           const notTooSmallBoxSize = preventBoxOverShrinkage(dragDifference)
-
           setBoxSize(notTooSmallBoxSize)
-          setPositionDifference(positionDifferenceCopy)
+          
+          // extract this function
+          // Post-This function running: if you enlarge the box, it jumps to be 6px (border(Width|Height) * 2) bigger. May be hard and pointless to fix as it's barely noticeable
+          function preventBoxMovementWhenShrunk() {
+            // 200 needs to be environment variable
+            const pd = {x: positionDifferenceCopy.x, y: positionDifferenceCopy.y}
+            if(sides.includes("left") && dragDifference.x < 200 ) {
+              pd.x = positionDifference.x + boxSize.x - 200
+            }
+            if (sides.includes("top") && dragDifference.y < 200) {
+              pd.y = positionDifference.y + boxSize.y - 200
+            }
+            return pd
+          }
+          
+          const unMovedPositionDifference: Position = preventBoxMovementWhenShrunk()
+          setPositionDifference(unMovedPositionDifference)
+
         }
       }   
       
