@@ -61,7 +61,7 @@ export function EditableBox(props: EditableBoxProps) {
           // extract this function
           // Post-This function running: if you enlarge the box, it jumps to be 6px (border(Width|Height) * 2) bigger. May be hard and pointless to fix as it's barely noticeable
           function preventBoxMovementWhenShrunk() {
-            // 200 needs to be environment variable
+            // 200 needs to be whatever the size of the smallest box in the grid
             const pd = {x: positionDifferenceCopy.x, y: positionDifferenceCopy.y}
             if(sides.includes("left") && dragDifference.x < 200 ) {
               pd.x = positionDifference.x + boxSize.x - 200
