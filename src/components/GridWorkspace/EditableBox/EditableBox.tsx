@@ -11,6 +11,7 @@ import { isMouseInBounds } from "../../../utils/isMouseInBounds"
 import { draggableBoxPositionCheck } from "../../../utils/draggableBoxPositionCheck"
 import { resizeBoxWithinGrid } from "../../../utils/resizeBoxWithinGrid"
 import { preventBoxOverShrinkage } from "../../../utils/preventBoxOverShrinkage"
+import { preventBoxMovementWhenShrunk } from "../../../utils/preventBoxMovementWhenShrunk"
 
 let borderWidth = 0
 export function EditableBox(props: EditableBoxProps) {
@@ -43,6 +44,8 @@ export function EditableBox(props: EditableBoxProps) {
         if (isDraggable && gridRect && rect?.x && rect.y) {
           const moveBoxPayload: MoveBoxPayload = {event, mousePos, rect, gridRect, borderWidth, scrollComp}
           
+          // Review this function being called for both X and Y
+          // It seemed good before but it's not consistent with what else is added and it doesn't make sense for that.
           setPositionDifference({ 
             x: moveBoxWithinGridByAxis("x", moveBoxPayload),
             y: moveBoxWithinGridByAxis("y", moveBoxPayload)
@@ -57,22 +60,8 @@ export function EditableBox(props: EditableBoxProps) {
 
           const notTooSmallBoxSize = preventBoxOverShrinkage(dragDifference)
           setBoxSize(notTooSmallBoxSize)
-          
-          // extract this function
-          // Post-This function running: if you enlarge the box, it jumps to be 6px (border(Width|Height) * 2) bigger. May be hard and pointless to fix as it's barely noticeable
-          function preventBoxMovementWhenShrunk() {
-            // 200 needs to be whatever the size of the smallest box in the grid
-            const pd = {x: positionDifferenceCopy.x, y: positionDifferenceCopy.y}
-            if(sides.includes("left") && dragDifference.x < 200 ) {
-              pd.x = positionDifference.x + boxSize.x - 200
-            }
-            if (sides.includes("top") && dragDifference.y < 200) {
-              pd.y = positionDifference.y + boxSize.y - 200
-            }
-            return pd
-          }
-          
-          const unMovedPositionDifference: Position = preventBoxMovementWhenShrunk()
+
+          const unMovedPositionDifference: Position = preventBoxMovementWhenShrunk({positionDifferenceCopy, positionDifference, dragDifference, boxSize, sides})
           setPositionDifference(unMovedPositionDifference)
 
         }

@@ -1,5 +1,4 @@
 import type { ResizeBoxPayload, Position} from "../components/GridWorkspace/EditableBox/types"
-import { moveBoxWithinGridByAxis } from "./moveBoxWithinGridByAxis"
 
 export function resizeBoxWithinGrid({event, mousePos, rect, gridRect, borderWidth, boxSize, positionDifference, sides, scrollComp}: ResizeBoxPayload) {
     const dragDifference: Position = {...boxSize}

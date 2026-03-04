@@ -41,3 +41,11 @@ export interface DraggableBoxPositionCheckPayload {
   rect: DOMRect, 
   scrollComp: Position
 }
+
+export interface PreventBoxMovementWhenShrunkPayload {
+  positionDifferenceCopy: Position, 
+  positionDifference: Position, 
+  dragDifference: Position, 
+  boxSize: Position, 
+  sides: Side[]
+}
