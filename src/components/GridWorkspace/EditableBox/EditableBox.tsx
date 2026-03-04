@@ -5,9 +5,13 @@ import "./EditableBox.css"
 import useMousePosition from "../../../hooks/useMousePosition"
 import useScrollPosition from "../../../hooks/useScrollPosition"
 
-import type { EditableBoxProps, Position } from "./types"
+import type { DraggableBoxPositionCheckPayload, EditableBoxProps, MoveBoxPayload, Position, ResizeBoxPayload, Side } from "./types"
 import { moveBoxWithinGridByAxis } from "../../../utils/moveBoxWithinGridByAxis"
 import { isMouseInBounds } from "../../../utils/isMouseInBounds"
+import { draggableBoxPositionCheck } from "../../../utils/draggableBoxPositionCheck"
+import { resizeBoxWithinGrid } from "../../../utils/resizeBoxWithinGrid"
+import { preventBoxOverShrinkage } from "../../../utils/preventBoxOverShrinkage"
+import { preventBoxMovementWhenShrunk } from "../../../utils/preventBoxMovementWhenShrunk"
 
 let borderWidth = 0
 export function EditableBox(props: EditableBoxProps) {
@@ -15,6 +19,7 @@ export function EditableBox(props: EditableBoxProps) {
   const [isDraggable, setIsDraggable] = useState(false)
   const [positionDifference, setPositionDifference] = useState<Position>({x: 0, y: 0})
   const [manuallyUpdatedScrollPos, setManuallyUpdatedScrollPos] = useState<Position>({x: 0, y: 0})
+  const [boxSize, setBoxSize] = useState<Position>({x: 300, y: 300})
 
   const scrollPos: Position = useScrollPosition();
   const mousePos: Position = useMousePosition();
@@ -32,12 +37,15 @@ export function EditableBox(props: EditableBoxProps) {
     if (boxRef.current) {
       setRect(boxRef.current.getBoundingClientRect())
       setManuallyUpdatedScrollPos({x: window.scrollX, y: window.scrollY})
+
+      let scrollComp: Position = {x: 0, y: 0}
       
       const updatePosition = (event: MouseEvent ) => {
         if (isDraggable && gridRect && rect?.x && rect.y) {
-          const scrollComp = {x: scrollPos.x - manuallyUpdatedScrollPos.x, y: scrollPos.y - manuallyUpdatedScrollPos.y }
-          const moveBoxPayload = {event, mousePos, rect, gridRect, borderWidth, scrollComp}
-
+          const moveBoxPayload: MoveBoxPayload = {event, mousePos, rect, gridRect, borderWidth, scrollComp}
+          
+          // Review this function being called for both X and Y
+          // It seemed good before but it's not consistent with what else is added and it doesn't make sense for that.
           setPositionDifference({ 
             x: moveBoxWithinGridByAxis("x", moveBoxPayload),
             y: moveBoxWithinGridByAxis("y", moveBoxPayload)
@@ -45,9 +53,42 @@ export function EditableBox(props: EditableBoxProps) {
         }
       };
 
-      window.addEventListener("mousemove", updatePosition);
+      const updateBoxSize = (event: MouseEvent, sides: Side[]) => {
+        if (rect && gridRect) {
+          const resizeBoxPayload: ResizeBoxPayload = {event, mousePos, rect, gridRect, borderWidth, boxSize, positionDifference, sides, scrollComp}
+          const {dragDifference, positionDifferenceCopy} = resizeBoxWithinGrid(resizeBoxPayload)
+
+          const notTooSmallBoxSize = preventBoxOverShrinkage(dragDifference)
+          setBoxSize(notTooSmallBoxSize)
+
+          const unMovedPositionDifference: Position = preventBoxMovementWhenShrunk({positionDifferenceCopy, positionDifference, dragDifference, boxSize, sides})
+          setPositionDifference(unMovedPositionDifference)
+
+        }
+      }   
+      
+      const dragOrResizeBox = (event: MouseEvent) => {
+        if (rect && isDraggable) {
+          scrollComp = {x: scrollPos.x - manuallyUpdatedScrollPos.x, y: scrollPos.y - manuallyUpdatedScrollPos.y }
+
+          const draggablePositionCheckPayload: DraggableBoxPositionCheckPayload = {mousePos, rect, scrollComp}
+          const draggableSides: Side[] = draggableBoxPositionCheck(draggablePositionCheckPayload)
+
+          if (scrollComp.x || scrollComp.y) {
+            setBoxSize(boxSize)
+          }
+
+          if (draggableSides.length > 0) {
+            updateBoxSize(event, draggableSides)
+          } else {
+            updatePosition(event)
+          }          
+        }           
+      }
+
+      window.addEventListener("mousemove", dragOrResizeBox);
       return () => {
-        window.removeEventListener("mousemove", updatePosition)
+        window.removeEventListener("mousemove", dragOrResizeBox)
       };
       
     }
@@ -59,8 +100,8 @@ export function EditableBox(props: EditableBoxProps) {
   }
 
   return (
-    <main id="editable-box" ref={boxRef} onMouseDown={() => setIsDraggable(true)} style={{left: positionDifference.x, top: positionDifference.y, position: "relative"}}>
-      <h1>Box Info:</h1>
+    <main id="editable-box" ref={boxRef} onMouseDown={() => setIsDraggable(true)} style={{left: positionDifference.x, top: positionDifference.y, position: "relative", width: `${boxSize.x}px`, height: `${boxSize.y}px`}}>
+      {/* <h1>Box Info:</h1>
       <ul unselectable="on">
         <li>Draggable: {String(isDraggable)} </li>
         <li>Mouse Down: {String(mouseDown)} </li>
@@ -70,7 +111,7 @@ export function EditableBox(props: EditableBoxProps) {
         <li>Y Dragged: {Math.round(positionDifference.y)}px </li>
         <li>X Box Window Position: {rect?.x ? Math.round(rect?.x) : 0}px </li>
         <li>Y Box Window Position: {rect?.x ? Math.round(rect?.y) : 0}px </li>
-      </ul>
+      </ul> */}
     </main>
   )
 }
