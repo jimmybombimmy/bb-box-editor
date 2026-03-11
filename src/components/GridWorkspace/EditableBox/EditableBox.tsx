@@ -44,7 +44,7 @@ export function EditableBox(props: EditableBoxProps) {
         if (isDraggable && gridRect && rect?.x && rect.y) {
           const moveBoxPayload: MoveBoxPayload = {event, mousePos, rect, gridRect, borderWidth, scrollComp}
           
-          // Review this function being called for both X and Y
+          // Review this function being called for both X and Y.
           // It seemed good before but it's not consistent with what else is added and it doesn't make sense for that.
           setPositionDifference({ 
             x: moveBoxWithinGridByAxis("x", moveBoxPayload),
@@ -101,6 +101,7 @@ export function EditableBox(props: EditableBoxProps) {
 
   return (
     <main id="editable-box" ref={boxRef} onMouseDown={() => setIsDraggable(true)} style={{left: positionDifference.x, top: positionDifference.y, position: "relative", width: `${boxSize.x}px`, height: `${boxSize.y}px`}}>
+      <div id="editable-box-inner">
       {/* <h1>Box Info:</h1>
       <ul unselectable="on">
         <li>Draggable: {String(isDraggable)} </li>
@@ -112,6 +113,7 @@ export function EditableBox(props: EditableBoxProps) {
         <li>X Box Window Position: {rect?.x ? Math.round(rect?.x) : 0}px </li>
         <li>Y Box Window Position: {rect?.x ? Math.round(rect?.y) : 0}px </li>
       </ul> */}
+      </div>
     </main>
   )
 }

@@ -1,7 +1,9 @@
 import { defineConfig } from 'vite'
+import EnvironmentPlugin from 'vite-plugin-environment';
 import react from '@vitejs/plugin-react'
 
-// https://vite.dev/config/
+const clientEnvVars = ['BOX_RESIZE_BUFFER']
+
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), EnvironmentPlugin(clientEnvVars)],
 })
