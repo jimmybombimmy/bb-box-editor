@@ -12,6 +12,7 @@ import { draggableBoxPositionCheck } from "../../../utils/draggableBoxPositionCh
 import { resizeBoxWithinGrid } from "../../../utils/resizeBoxWithinGrid"
 import { preventBoxOverShrinkage } from "../../../utils/preventBoxOverShrinkage"
 import { preventBoxMovementWhenShrunk } from "../../../utils/preventBoxMovementWhenShrunk"
+import { outerEditableBoxStyles, innerEditableBoxStyles } from "./EditableBox.styles"
 
 let borderWidth = 0
 export function EditableBox(props: EditableBoxProps) {
@@ -100,8 +101,8 @@ export function EditableBox(props: EditableBoxProps) {
   }
 
   return (
-    <main id="editable-box" ref={boxRef} onMouseDown={() => setIsDraggable(true)} style={{left: positionDifference.x, top: positionDifference.y, position: "relative", width: `${boxSize.x}px`, height: `${boxSize.y}px`}}>
-      <div id="editable-box-inner">
+    <main id="editable-box" ref={boxRef} onMouseDown={() => setIsDraggable(true)} style={outerEditableBoxStyles(positionDifference, boxSize)}>
+      <div id="editable-box-inner" style={innerEditableBoxStyles(positionDifference, boxSize)}>
       {/* <h1>Box Info:</h1>
       <ul unselectable="on">
         <li>Draggable: {String(isDraggable)} </li>
