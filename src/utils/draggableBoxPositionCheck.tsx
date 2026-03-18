@@ -6,7 +6,7 @@ import env from "../config/dotenv";
 const pixelBuffer = env.BOX_RESIZE_BUFFER
 
 function dragInRangeCheck(value: number, target: number, scrollComp: number) {
-  return value > target - pixelBuffer - scrollComp && value < target + pixelBuffer - scrollComp
+  return value > target - (pixelBuffer * 2) - scrollComp && value < target + (pixelBuffer * 2) - scrollComp
 }
 
 export function draggableBoxPositionCheck({mousePos, rect, scrollComp}: DraggableBoxPositionCheckPayload) {
