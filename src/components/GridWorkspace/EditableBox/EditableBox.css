@@ -1,5 +1,9 @@
 #editable-box {
   height: 300px;
   width: 300px;
+  border: 3px dotted rgb(125, 125, 125, 0);
+}
+
+#editable-box-inner {
   border: 3px solid blue;
 }

@@ -1,9 +1,12 @@
-import type { DraggableBoxPositionCheckPayload, Side } from "../components/GridWorkspace/EditableBox/types"
+// import 'dotenv/config';
 
-const pixelBuffer = 50 // maybe make this an env variable at some point
+import type { DraggableBoxPositionCheckPayload, Side } from "../components/GridWorkspace/EditableBox/types"
+import env from "../config/dotenv";
+
+const pixelBuffer = env.BOX_RESIZE_BUFFER
 
 function dragInRangeCheck(value: number, target: number, scrollComp: number) {
-  return value > target - pixelBuffer - scrollComp && value < target + pixelBuffer - scrollComp
+  return value > target - (pixelBuffer * 2) - scrollComp && value < target + (pixelBuffer * 2) - scrollComp
 }
 
 export function draggableBoxPositionCheck({mousePos, rect, scrollComp}: DraggableBoxPositionCheckPayload) {

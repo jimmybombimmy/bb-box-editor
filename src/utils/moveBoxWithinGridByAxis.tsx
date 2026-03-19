@@ -1,4 +1,5 @@
 import type { MoveBoxPayload, AxisLC, AxisUC, ClientByAxis } from "../components/GridWorkspace/EditableBox/types"
+import env from "../config/dotenv"
 
 export function moveBoxWithinGridByAxis(axisLC: AxisLC, {event, mousePos, rect, gridRect, borderWidth, scrollComp }: MoveBoxPayload ): number {
 
@@ -10,13 +11,13 @@ export function moveBoxWithinGridByAxis(axisLC: AxisLC, {event, mousePos, rect, 
   if(!rect) return 0
 
   // prevent box leaking from top and left
-  if ((event[client] - mousePos[axisLC] + rect[axisLC]) < (0 + gridRect[axisLC] + scrollComp[axisLC]) ) {
-    return 0
+  if ((event[client] - mousePos[axisLC] + rect[axisLC]) < (0 + gridRect[axisLC] + scrollComp[axisLC] - env.BOX_RESIZE_BUFFER - borderWidth) ) {
+    return 0 - env.BOX_RESIZE_BUFFER - borderWidth
   } 
 
   // prevent box leaking from bottom and right
-  else if (gridRect && event[client] - mousePos[axisLC] + rect[axisLC] + rect[heightOrWidth] > gridRect[heightOrWidth] - (borderWidth * 2) + gridRect[axisLC] + scrollComp[axisLC]) {
-    return gridRect[heightOrWidth] - rect[heightOrWidth] - (borderWidth * 2) 
+  else if (gridRect && event[client] - mousePos[axisLC] + rect[axisLC] + rect[heightOrWidth] - env.BOX_RESIZE_BUFFER > gridRect[heightOrWidth] - (borderWidth * 3) + gridRect[axisLC] + scrollComp[axisLC]) {
+    return gridRect[heightOrWidth] - rect[heightOrWidth] - (borderWidth * 3) + env.BOX_RESIZE_BUFFER
   }
 
   else {
