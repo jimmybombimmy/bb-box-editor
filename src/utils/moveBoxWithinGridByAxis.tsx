@@ -1,26 +1,60 @@
-import type { MoveBoxPayload, AxisLC, AxisUC, ClientByAxis } from "../components/GridWorkspace/EditableBox/types"
-import env from "../config/dotenv"
+import type {
+  MoveBoxPayload,
+  AxisLC,
+  AxisUC,
+  ClientByAxis,
+} from '../components/GridWorkspace/EditableBox/types';
+import env from '../config/dotenv';
 
-export function moveBoxWithinGridByAxis(axisLC: AxisLC, {event, mousePos, rect, gridRect, borderWidth, scrollComp }: MoveBoxPayload ): number {
+export function moveBoxWithinGridByAxis(
+  axisLC: AxisLC,
+  { event, mousePos, rect, gridRect, borderWidth, scrollComp }: MoveBoxPayload,
+): number {
+  const heightOrWidth = axisLC == 'y' ? 'height' : 'width';
+  const axisUC = axisLC.toUpperCase() as AxisUC;
 
-  const heightOrWidth = axisLC == "y" ? "height" : "width"
-  const axisUC = axisLC.toUpperCase() as AxisUC
+  const client: ClientByAxis = `client${axisUC}`;
 
-  const client: ClientByAxis = `client${axisUC}`
-
-  if(!rect) return 0
+  if (!rect) return 0;
 
   // prevent box leaking from top and left
-  if ((event[client] - mousePos[axisLC] + rect[axisLC]) < (0 + gridRect[axisLC] + scrollComp[axisLC] - env.BOX_RESIZE_BUFFER - borderWidth) ) {
-    return 0 - env.BOX_RESIZE_BUFFER - borderWidth
-  } 
-
-  // prevent box leaking from bottom and right
-  else if (gridRect && event[client] - mousePos[axisLC] + rect[axisLC] + rect[heightOrWidth] - env.BOX_RESIZE_BUFFER > gridRect[heightOrWidth] - (borderWidth * 3) + gridRect[axisLC] + scrollComp[axisLC]) {
-    return gridRect[heightOrWidth] - rect[heightOrWidth] - (borderWidth * 3) + env.BOX_RESIZE_BUFFER
+  if (
+    event[client] - mousePos[axisLC] + rect[axisLC] <
+    0 +
+      gridRect[axisLC] +
+      scrollComp[axisLC] -
+      env.BOX_RESIZE_BUFFER -
+      borderWidth
+  ) {
+    return 0 - env.BOX_RESIZE_BUFFER - borderWidth;
   }
 
-  else {
-    return event[client] - mousePos[axisLC] + rect[axisLC] - gridRect[axisLC] - scrollComp[axisLC]
+  // prevent box leaking from bottom and right
+  else if (
+    gridRect &&
+    event[client] -
+      mousePos[axisLC] +
+      rect[axisLC] +
+      rect[heightOrWidth] -
+      env.BOX_RESIZE_BUFFER >
+      gridRect[heightOrWidth] -
+        borderWidth * 3 +
+        gridRect[axisLC] +
+        scrollComp[axisLC]
+  ) {
+    return (
+      gridRect[heightOrWidth] -
+      rect[heightOrWidth] -
+      borderWidth * 3 +
+      env.BOX_RESIZE_BUFFER
+    );
+  } else {
+    return (
+      event[client] -
+      mousePos[axisLC] +
+      rect[axisLC] -
+      gridRect[axisLC] -
+      scrollComp[axisLC]
+    );
   }
 }
