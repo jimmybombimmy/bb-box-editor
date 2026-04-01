@@ -1,9 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from "react";
 
-import './EditableBox.css';
+import "./EditableBox.css";
 
-import useMousePosition from '../../../hooks/useMousePosition';
-import useScrollPosition from '../../../hooks/useScrollPosition';
+import useMousePosition from "../../../hooks/useMousePosition";
+import useScrollPosition from "../../../hooks/useScrollPosition";
 
 import type {
   DraggableBoxPositionCheckPayload,
@@ -12,19 +12,22 @@ import type {
   Position,
   ResizeBoxPayload,
   Side,
-} from './types';
-import { moveBoxWithinGridByAxis } from '../../../utils/moveBoxWithinGridByAxis';
-import { isMouseInBounds } from '../../../utils/isMouseInBounds';
-import { draggableBoxPositionCheck } from '../../../utils/draggableBoxPositionCheck';
-import { resizeBoxWithinGrid } from '../../../utils/resizeBoxWithinGrid';
-import { preventBoxOverShrinkage } from '../../../utils/preventBoxOverShrinkage';
-import { preventBoxMovementWhenShrunk } from '../../../utils/preventBoxMovementWhenShrunk';
+} from "./types";
+import { moveBoxWithinGridByAxis } from "../../../utils/moveBoxWithinGridByAxis";
+import { isMouseInBounds } from "../../../utils/isMouseInBounds";
+import { draggableBoxPositionCheck } from "../../../utils/draggableBoxPositionCheck";
+import { resizeBoxWithinGrid } from "../../../utils/resizeBoxWithinGrid";
+import { preventBoxOverShrinkage } from "../../../utils/preventBoxOverShrinkage";
+import { preventBoxMovementWhenShrunk } from "../../../utils/preventBoxMovementWhenShrunk";
 import {
   outerEditableBoxStyles,
-  innerEditableBoxStyles,
-} from './EditableBox.styles';
+  innerEditableBoxPositionStyles,
+  innerEditableBoxBorderColours,
+  createBorderColoursObject,
+} from "./EditableBox.styles";
 
 let borderWidth = 0;
+
 export function EditableBox(props: EditableBoxProps) {
   const { mouseDown, gridRect } = props;
   const [isDraggable, setIsDraggable] = useState(false);
@@ -35,6 +38,9 @@ export function EditableBox(props: EditableBoxProps) {
   const [manuallyUpdatedScrollPos, setManuallyUpdatedScrollPos] =
     useState<Position>({ x: 0, y: 0 });
   const [boxSize, setBoxSize] = useState<Position>({ x: 300, y: 300 });
+  const [borderColours, setBorderColours] = useState<any>({
+    ...innerEditableBoxBorderColours,
+  }); // create bordercolours type
 
   const scrollPos: Position = useScrollPosition();
   const mousePos: Position = useMousePosition();
@@ -45,7 +51,7 @@ export function EditableBox(props: EditableBoxProps) {
   useEffect(() => {
     if (rect && boxRef.current) {
       borderWidth = Number(
-        getComputedStyle(boxRef.current).borderBlockWidth.replace('px', ''),
+        getComputedStyle(boxRef.current).borderBlockWidth.replace("px", ""),
       );
     }
   }, [rect]);
@@ -68,11 +74,14 @@ export function EditableBox(props: EditableBoxProps) {
             scrollComp,
           };
 
+          const bc = createBorderColoursObject(borderColours, "all");
+          setBorderColours(bc);
+
           // Review this function being called for both X and Y.
           // It seemed good before but it's not consistent with what else is added and it doesn't make sense for that.
           setPositionDifference({
-            x: moveBoxWithinGridByAxis('x', moveBoxPayload),
-            y: moveBoxWithinGridByAxis('y', moveBoxPayload),
+            x: moveBoxWithinGridByAxis("x", moveBoxPayload),
+            y: moveBoxWithinGridByAxis("y", moveBoxPayload),
           });
         }
       };
@@ -133,9 +142,12 @@ export function EditableBox(props: EditableBoxProps) {
         }
       };
 
-      window.addEventListener('mousemove', dragOrResizeBox);
+      window.addEventListener("mousemove", dragOrResizeBox);
       return () => {
-        window.removeEventListener('mousemove', dragOrResizeBox);
+        const bc = createBorderColoursObject(borderColours, "none");
+        setBorderColours(bc);
+
+        window.removeEventListener("mousemove", dragOrResizeBox);
       };
     }
     // eslint-disable-next-line -- states other vars should be added below which breaks dragging functionality
@@ -154,7 +166,10 @@ export function EditableBox(props: EditableBoxProps) {
     >
       <div
         id="editable-box-inner"
-        style={innerEditableBoxStyles(positionDifference, boxSize)}
+        style={{
+          ...innerEditableBoxPositionStyles(positionDifference, boxSize),
+          ...borderColours,
+        }}
       >
         {/* <h1>Box Info:</h1>
       <ul unselectable="on">
