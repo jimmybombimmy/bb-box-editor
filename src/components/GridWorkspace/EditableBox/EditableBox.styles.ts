@@ -1,4 +1,4 @@
-import type { InnerEditableBoxStyles, OuterEditableBoxStyles, Position, Pixels, Side } from "./types"
+import type { InnerEditableBoxStyles, OuterEditableBoxStyles, Position, Pixels, Side, GridBorderColourStyles } from "./types"
 import env from "../../../config/dotenv"
 
 const pxString = (num: number): Pixels => {
@@ -26,10 +26,10 @@ export const innerEditableBoxPositionStyles = (positionDifference: Position, box
 }
 
 // To be determined by user at some point???
-let highlightColour = "blue"
+let highlightColour: string = "blue"
 
-// set border colour obj as Type
-export const innerEditableBoxBorderColours: any = {
+
+export const innerEditableBoxBorderColours: GridBorderColourStyles = {
   borderLeftColor: undefined,
   borderRightColor: undefined,
   borderTopColor: undefined,
@@ -37,15 +37,15 @@ export const innerEditableBoxBorderColours: any = {
 }
 
 // Maybe another type for hovering???
-export const createBorderColoursObject = (borderColourObj: any, sides: Side[] | "all" | "none") => {
-  const borderColourObjCopy = { ...borderColourObj }
+export const createBorderColoursObject = (borderColourObj: GridBorderColourStyles, sides: Side[] | "all" | "none") => {
+  const borderColourObjCopy: GridBorderColourStyles = { ...borderColourObj }
 
   if (sides === "all") {
-    for (let colour in borderColourObjCopy) {
+    for (let colour of Object.keys(borderColourObj) as (keyof GridBorderColourStyles)[]) {
       borderColourObjCopy[colour] = highlightColour
     }
   } else if (sides === "none") {
-    for (let colour in borderColourObjCopy) {
+    for (let colour of Object.keys(borderColourObj) as (keyof GridBorderColourStyles)[]) {
       borderColourObjCopy[colour] = "darkblue"
     }
   }

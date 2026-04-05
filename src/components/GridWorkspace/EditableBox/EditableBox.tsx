@@ -8,6 +8,7 @@ import useScrollPosition from "../../../hooks/useScrollPosition";
 import type {
   DraggableBoxPositionCheckPayload,
   EditableBoxProps,
+  GridBorderColourStyles,
   MoveBoxPayload,
   Position,
   ResizeBoxPayload,
@@ -38,7 +39,7 @@ export function EditableBox(props: EditableBoxProps) {
   const [manuallyUpdatedScrollPos, setManuallyUpdatedScrollPos] =
     useState<Position>({ x: 0, y: 0 });
   const [boxSize, setBoxSize] = useState<Position>({ x: 300, y: 300 });
-  const [borderColours, setBorderColours] = useState<any>({
+  const [borderColours, setBorderColours] = useState<GridBorderColourStyles>({
     ...innerEditableBoxBorderColours,
   }); // create bordercolours type
 

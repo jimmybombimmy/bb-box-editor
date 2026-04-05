@@ -68,3 +68,10 @@ export interface OuterEditableBoxStyles extends EditableBoxStyles {
 export interface InnerEditableBoxStyles extends EditableBoxStyles {
   margin: Pixels;
 }
+
+export interface GridBorderColourStyles {
+  borderLeftColor: string | undefined;
+  borderRightColor: string | undefined;
+  borderTopColor: string | undefined;
+  borderBottomColor: string | undefined;
+}
