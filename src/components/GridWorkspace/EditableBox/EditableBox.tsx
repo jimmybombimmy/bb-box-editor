@@ -41,7 +41,7 @@ export function EditableBox(props: EditableBoxProps) {
   const [boxSize, setBoxSize] = useState<Position>({ x: 300, y: 300 });
   const [borderColours, setBorderColours] = useState<GridBorderColourStyles>({
     ...innerEditableBoxBorderColours,
-  }); // create bordercolours type
+  });
 
   const scrollPos: Position = useScrollPosition();
   const mousePos: Position = useMousePosition();
@@ -100,6 +100,10 @@ export function EditableBox(props: EditableBoxProps) {
             sides,
             scrollComp,
           };
+
+          const bc = createBorderColoursObject(borderColours, sides);
+          setBorderColours(bc);
+
           const { dragDifference, positionDifferenceCopy } =
             resizeBoxWithinGrid(resizeBoxPayload);
 
@@ -114,6 +118,7 @@ export function EditableBox(props: EditableBoxProps) {
               boxSize,
               sides,
             });
+
           setPositionDifference(unMovedPositionDifference);
         }
       };
