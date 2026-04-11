@@ -26,37 +26,61 @@ export const innerEditableBoxPositionStyles = (positionDifference: Position, box
   }
 }
 
+const sidesArr = ["left", "right", "top", "bottom"]
+
 // To be determined by user at some point???
-let highlightColour: string = "blue"
+let defaultColour: string = "darkblue"
+let clickedColour: string = "lightblue"
+let hoverColour: string = "blue"
 
 export const innerEditableBoxBorderColours: GridBorderColourStyles = {
   borderLeftColor: undefined,
   borderRightColor: undefined,
   borderTopColor: undefined,
-  borderBottomColor: undefined
+  borderBottomColor: undefined,
 }
 
-// Maybe another type for hovering???
-export const createBorderColoursObject = (borderColourObj: GridBorderColourStyles, sides: Side[] | "all" | "none") => {
-  const borderColourObjCopy: GridBorderColourStyles = { ...borderColourObj }
+// Should this be in styles?? Seems like it could be a util or something
+export const createBorderColoursObject = (borderColourObj: GridBorderColourStyles, sides: Side[] | "all" | "none", hovering: boolean = false) => {
+  let borderColourObjCopy: GridBorderColourStyles = { ...borderColourObj }
+  let highlightColour: string;
+
+  if (hovering) {
+    highlightColour = hoverColour
+  } else {
+    highlightColour = clickedColour
+  }
+
+  if (sides === "none") {
+    for (const colour of Object.keys(borderColourObj) as (keyof GridBorderColourStyles)[]) {
+      borderColourObjCopy[colour] = defaultColour
+    }
+  }
 
   if (Array.isArray(sides)) {
+    let nonHighlightedSides = [...sidesArr];
+
     for (const side of sides) {
+      nonHighlightedSides = nonHighlightedSides.filter(e => e !== side)
       const borderSide = `border${title(side)}Color` as keyof GridBorderColourStyles
       borderColourObjCopy[borderSide] = highlightColour
     }
+
+    for (const side of nonHighlightedSides) {
+      const borderSide = `border${title(side)}Color` as keyof GridBorderColourStyles
+      borderColourObjCopy[borderSide] = defaultColour
+    }
+  } else {
+    console.log("is not sides")
   }
 
   if (sides === "all") {
     for (const colour of Object.keys(borderColourObj) as (keyof GridBorderColourStyles)[]) {
       borderColourObjCopy[colour] = highlightColour
     }
-  } else if (sides === "none") {
-    for (const colour of Object.keys(borderColourObj) as (keyof GridBorderColourStyles)[]) {
-      borderColourObjCopy[colour] = "darkblue"
-    }
   }
 
+  // console.log("output border obj", borderColourObjCopy)
 
   return borderColourObjCopy
 }
