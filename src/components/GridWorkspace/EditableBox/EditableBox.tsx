@@ -161,35 +161,32 @@ export function EditableBox(props: EditableBoxProps) {
   }, [isDraggable, mouseOver]);
 
   useEffect(() => {
-    const stuff = async () => {
-      if (!mouseOver || !rect || isDraggable) return;
-      const isHighlighted = true;
+    if (!mouseOver || !rect || isDraggable) return;
+    const isHighlighted = true;
 
-      // This should probably be state if I go with this method
-      const scrollComp = {
-        x: scrollPos.x - manuallyUpdatedScrollPos.x,
-        y: scrollPos.y - manuallyUpdatedScrollPos.y,
-      };
-
-      const draggablePositionCheckPayload: DraggableBoxPositionCheckPayload = {
-        mousePos,
-        rect,
-        scrollComp,
-      };
-      const highlightedSides: Side[] = draggableBoxPositionCheck(
-        draggablePositionCheckPayload,
-      );
-
-      if (highlightedSides) {
-        const bc = await createBorderColoursObject(
-          borderColours,
-          highlightedSides,
-          isHighlighted,
-        );
-        setBorderColours(bc);
-      }
+    // This should probably be state if I go with this method
+    const scrollComp = {
+      x: scrollPos.x - manuallyUpdatedScrollPos.x,
+      y: scrollPos.y - manuallyUpdatedScrollPos.y,
     };
-    stuff();
+
+    const draggablePositionCheckPayload: DraggableBoxPositionCheckPayload = {
+      mousePos,
+      rect,
+      scrollComp,
+    };
+    const highlightedSides: Side[] = draggableBoxPositionCheck(
+      draggablePositionCheckPayload,
+    );
+
+    if (highlightedSides) {
+      const bc = createBorderColoursObject(
+        borderColours,
+        highlightedSides,
+        isHighlighted,
+      );
+      setBorderColours(bc);
+    }
   }, [mousePos]);
 
   if ((!mouseDown || !isMouseInBounds(mousePos)) && isDraggable) {
