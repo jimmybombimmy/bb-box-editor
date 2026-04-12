@@ -70,8 +70,6 @@ export const createBorderColoursObject = (borderColourObj: GridBorderColourStyle
       const borderSide = `border${title(side)}Color` as keyof GridBorderColourStyles
       borderColourObjCopy[borderSide] = defaultColour
     }
-  } else {
-    console.log("is not sides")
   }
 
   if (sides === "all") {

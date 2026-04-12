@@ -175,18 +175,27 @@ export function EditableBox(props: EditableBoxProps) {
       rect,
       scrollComp,
     };
+
     const highlightedSides: Side[] = draggableBoxPositionCheck(
       draggablePositionCheckPayload,
     );
 
-    if (highlightedSides) {
-      const bc = createBorderColoursObject(
+    if (!Array.isArray(highlightedSides)) return;
+
+    let bc: GridBorderColourStyles;
+
+    if (highlightedSides.length > 0) {
+      bc = createBorderColoursObject(
         borderColours,
         highlightedSides,
         isHighlighted,
       );
       setBorderColours(bc);
+    } else {
+      bc = createBorderColoursObject(borderColours, "all", isHighlighted);
     }
+
+    setBorderColours(bc);
   }, [mousePos]);
 
   if ((!mouseDown || !isMouseInBounds(mousePos)) && isDraggable) {
