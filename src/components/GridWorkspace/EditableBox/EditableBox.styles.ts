@@ -1,4 +1,4 @@
-import type { InnerEditableBoxStyles, OuterEditableBoxStyles, Position, Pixels } from "./types"
+import type { InnerEditableBoxStyles, OuterEditableBoxStyles, Position, Pixels, GridBorderColourStyles } from "./types"
 import env from "../../../config/dotenv"
 
 const pxString = (num: number): Pixels => {
@@ -15,7 +15,7 @@ export const outerEditableBoxStyles = (positionDifference: Position, boxSize: Po
   }
 }
 
-export const innerEditableBoxStyles = (positionDifference: Position, boxSize: Position): InnerEditableBoxStyles => {
+export const innerEditableBoxPositionStyles = (positionDifference: Position, boxSize: Position): InnerEditableBoxStyles => {
   return {
     top: pxString(positionDifference.y),
     left: pxString(positionDifference.x),
@@ -23,4 +23,13 @@ export const innerEditableBoxStyles = (positionDifference: Position, boxSize: Po
     width: pxString(boxSize.x - (env.BOX_RESIZE_BUFFER * 2)),
     margin: pxString(env.BOX_RESIZE_BUFFER)
   }
+}
+
+export const sidesArr = ["left", "right", "top", "bottom"]
+
+export const innerEditableBoxBorderColours: GridBorderColourStyles = {
+  borderLeftColor: undefined,
+  borderRightColor: undefined,
+  borderTopColor: undefined,
+  borderBottomColor: undefined,
 }

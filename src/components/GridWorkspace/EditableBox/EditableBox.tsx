@@ -1,30 +1,34 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from "react";
 
-import './EditableBox.css';
+import "./EditableBox.css";
 
-import useMousePosition from '../../../hooks/useMousePosition';
-import useScrollPosition from '../../../hooks/useScrollPosition';
+import useMousePosition from "../../../hooks/useMousePosition";
+import useScrollPosition from "../../../hooks/useScrollPosition";
 
 import type {
   DraggableBoxPositionCheckPayload,
   EditableBoxProps,
+  GridBorderColourStyles,
   MoveBoxPayload,
   Position,
   ResizeBoxPayload,
   Side,
-} from './types';
-import { moveBoxWithinGridByAxis } from '../../../utils/moveBoxWithinGridByAxis';
-import { isMouseInBounds } from '../../../utils/isMouseInBounds';
-import { draggableBoxPositionCheck } from '../../../utils/draggableBoxPositionCheck';
-import { resizeBoxWithinGrid } from '../../../utils/resizeBoxWithinGrid';
-import { preventBoxOverShrinkage } from '../../../utils/preventBoxOverShrinkage';
-import { preventBoxMovementWhenShrunk } from '../../../utils/preventBoxMovementWhenShrunk';
+} from "./types";
+import { createBorderColoursObject } from "../../../utils/createBorderColoursObj";
+import { moveBoxWithinGridByAxis } from "../../../utils/moveBoxWithinGridByAxis";
+import { isMouseInBounds } from "../../../utils/isMouseInBounds";
+import { draggableBoxPositionCheck } from "../../../utils/draggableBoxPositionCheck";
+import { resizeBoxWithinGrid } from "../../../utils/resizeBoxWithinGrid";
+import { preventBoxOverShrinkage } from "../../../utils/preventBoxOverShrinkage";
+import { preventBoxMovementWhenShrunk } from "../../../utils/preventBoxMovementWhenShrunk";
 import {
   outerEditableBoxStyles,
-  innerEditableBoxStyles,
-} from './EditableBox.styles';
+  innerEditableBoxPositionStyles,
+  innerEditableBoxBorderColours,
+} from "./EditableBox.styles";
 
 let borderWidth = 0;
+
 export function EditableBox(props: EditableBoxProps) {
   const { mouseDown, gridRect } = props;
   const [isDraggable, setIsDraggable] = useState(false);
@@ -35,6 +39,10 @@ export function EditableBox(props: EditableBoxProps) {
   const [manuallyUpdatedScrollPos, setManuallyUpdatedScrollPos] =
     useState<Position>({ x: 0, y: 0 });
   const [boxSize, setBoxSize] = useState<Position>({ x: 300, y: 300 });
+  const [borderColours, setBorderColours] = useState<GridBorderColourStyles>({
+    ...innerEditableBoxBorderColours,
+  });
+  const [mouseOver, setMouseOver] = useState(true);
 
   const scrollPos: Position = useScrollPosition();
   const mousePos: Position = useMousePosition();
@@ -45,101 +53,150 @@ export function EditableBox(props: EditableBoxProps) {
   useEffect(() => {
     if (rect && boxRef.current) {
       borderWidth = Number(
-        getComputedStyle(boxRef.current).borderBlockWidth.replace('px', ''),
+        getComputedStyle(boxRef.current).borderBlockWidth.replace("px", ""),
       );
     }
   }, [rect]);
 
   useEffect(() => {
-    if (boxRef.current) {
-      setRect(boxRef.current.getBoundingClientRect());
-      setManuallyUpdatedScrollPos({ x: window.scrollX, y: window.scrollY });
+    if (!boxRef.current || !mouseOver) return;
 
-      let scrollComp: Position = { x: 0, y: 0 };
+    setRect(boxRef.current.getBoundingClientRect());
+    setManuallyUpdatedScrollPos({ x: window.scrollX, y: window.scrollY });
 
-      const updatePosition = (event: MouseEvent) => {
-        if (isDraggable && gridRect && rect?.x && rect.y) {
-          const moveBoxPayload: MoveBoxPayload = {
-            event,
-            mousePos,
-            rect,
-            gridRect,
-            borderWidth,
-            scrollComp,
-          };
+    let scrollComp: Position = { x: 0, y: 0 };
 
-          // Review this function being called for both X and Y.
-          // It seemed good before but it's not consistent with what else is added and it doesn't make sense for that.
-          setPositionDifference({
-            x: moveBoxWithinGridByAxis('x', moveBoxPayload),
-            y: moveBoxWithinGridByAxis('y', moveBoxPayload),
-          });
-        }
-      };
+    const updatePosition = (event: MouseEvent) => {
+      if (isDraggable && gridRect && rect?.x && rect.y) {
+        const moveBoxPayload: MoveBoxPayload = {
+          event,
+          mousePos,
+          rect,
+          gridRect,
+          borderWidth,
+          scrollComp,
+        };
 
-      const updateBoxSize = (event: MouseEvent, sides: Side[]) => {
-        if (rect && gridRect) {
-          const resizeBoxPayload: ResizeBoxPayload = {
-            event,
-            mousePos,
-            rect,
-            gridRect,
-            borderWidth,
-            boxSize,
+        const bc = createBorderColoursObject(borderColours, "all");
+        setBorderColours(bc);
+
+        // Review this function being called for both X and Y.
+        // It seemed good before but it's not consistent with what else is added and it doesn't make sense for that.
+        setPositionDifference({
+          x: moveBoxWithinGridByAxis("x", moveBoxPayload),
+          y: moveBoxWithinGridByAxis("y", moveBoxPayload),
+        });
+      }
+    };
+
+    const updateBoxSize = (event: MouseEvent, sides: Side[]) => {
+      if (rect && gridRect) {
+        const resizeBoxPayload: ResizeBoxPayload = {
+          event,
+          mousePos,
+          rect,
+          gridRect,
+          borderWidth,
+          boxSize,
+          positionDifference,
+          sides,
+          scrollComp,
+        };
+
+        const bc = createBorderColoursObject(borderColours, sides);
+        setBorderColours(bc);
+
+        const { dragDifference, positionDifferenceCopy } =
+          resizeBoxWithinGrid(resizeBoxPayload);
+
+        const notTooSmallBoxSize = preventBoxOverShrinkage(dragDifference);
+        setBoxSize(notTooSmallBoxSize);
+
+        const unMovedPositionDifference: Position =
+          preventBoxMovementWhenShrunk({
+            positionDifferenceCopy,
             positionDifference,
+            dragDifference,
+            boxSize,
             sides,
-            scrollComp,
-          };
-          const { dragDifference, positionDifferenceCopy } =
-            resizeBoxWithinGrid(resizeBoxPayload);
+          });
 
-          const notTooSmallBoxSize = preventBoxOverShrinkage(dragDifference);
-          setBoxSize(notTooSmallBoxSize);
+        setPositionDifference(unMovedPositionDifference);
+      }
+    };
 
-          const unMovedPositionDifference: Position =
-            preventBoxMovementWhenShrunk({
-              positionDifferenceCopy,
-              positionDifference,
-              dragDifference,
-              boxSize,
-              sides,
-            });
-          setPositionDifference(unMovedPositionDifference);
+    const dragOrResizeBox = (event: MouseEvent) => {
+      if (rect && isDraggable) {
+        scrollComp = {
+          x: scrollPos.x - manuallyUpdatedScrollPos.x,
+          y: scrollPos.y - manuallyUpdatedScrollPos.y,
+        };
+
+        const draggablePositionCheckPayload: DraggableBoxPositionCheckPayload =
+          { mousePos, rect, scrollComp };
+        const draggableSides: Side[] = draggableBoxPositionCheck(
+          draggablePositionCheckPayload,
+        );
+
+        if (scrollComp.x || scrollComp.y) {
+          setBoxSize(boxSize);
         }
-      };
 
-      const dragOrResizeBox = (event: MouseEvent) => {
-        if (rect && isDraggable) {
-          scrollComp = {
-            x: scrollPos.x - manuallyUpdatedScrollPos.x,
-            y: scrollPos.y - manuallyUpdatedScrollPos.y,
-          };
-
-          const draggablePositionCheckPayload: DraggableBoxPositionCheckPayload =
-            { mousePos, rect, scrollComp };
-          const draggableSides: Side[] = draggableBoxPositionCheck(
-            draggablePositionCheckPayload,
-          );
-
-          if (scrollComp.x || scrollComp.y) {
-            setBoxSize(boxSize);
-          }
-
-          if (draggableSides.length > 0) {
-            updateBoxSize(event, draggableSides);
-          } else {
-            updatePosition(event);
-          }
+        if (draggableSides.length > 0) {
+          updateBoxSize(event, draggableSides);
+        } else {
+          updatePosition(event);
         }
-      };
+      }
+    };
 
-      window.addEventListener('mousemove', dragOrResizeBox);
-      return () => {
-        window.removeEventListener('mousemove', dragOrResizeBox);
-      };
+    window.addEventListener("mousemove", dragOrResizeBox);
+
+    return () => {
+      const bc = createBorderColoursObject(borderColours, "none");
+      setBorderColours(bc);
+
+      window.removeEventListener("mousemove", dragOrResizeBox);
+    };
+  }, [isDraggable, mouseOver]);
+
+  useEffect(() => {
+    if (!mouseOver || !rect || isDraggable) return;
+    const isHighlighted = true;
+
+    // This should probably be state if I go with this method
+    const scrollComp = {
+      x: scrollPos.x - manuallyUpdatedScrollPos.x,
+      y: scrollPos.y - manuallyUpdatedScrollPos.y,
+    };
+
+    const draggablePositionCheckPayload: DraggableBoxPositionCheckPayload = {
+      mousePos,
+      rect,
+      scrollComp,
+    };
+
+    const highlightedSides: Side[] = draggableBoxPositionCheck(
+      draggablePositionCheckPayload,
+    );
+
+    if (!Array.isArray(highlightedSides)) return;
+
+    let bc: GridBorderColourStyles;
+
+    if (highlightedSides.length > 0) {
+      bc = createBorderColoursObject(
+        borderColours,
+        highlightedSides,
+        isHighlighted,
+      );
+      setBorderColours(bc);
+    } else {
+      bc = createBorderColoursObject(borderColours, "all", isHighlighted);
     }
-    // eslint-disable-next-line -- states other vars should be added below which breaks dragging functionality
-  }, [isDraggable]);
+
+    setBorderColours(bc);
+  }, [mousePos]);
 
   if ((!mouseDown || !isMouseInBounds(mousePos)) && isDraggable) {
     setIsDraggable(false);
@@ -150,11 +207,16 @@ export function EditableBox(props: EditableBoxProps) {
       id="editable-box"
       ref={boxRef}
       onMouseDown={() => setIsDraggable(true)}
+      onPointerEnter={() => setMouseOver(true)}
+      onPointerLeave={() => setMouseOver(false)}
       style={outerEditableBoxStyles(positionDifference, boxSize)}
     >
       <div
         id="editable-box-inner"
-        style={innerEditableBoxStyles(positionDifference, boxSize)}
+        style={{
+          ...innerEditableBoxPositionStyles(positionDifference, boxSize),
+          ...borderColours,
+        }}
       >
         {/* <h1>Box Info:</h1>
       <ul unselectable="on">

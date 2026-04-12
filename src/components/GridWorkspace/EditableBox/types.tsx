@@ -1,4 +1,4 @@
-import type { Property } from 'csstype';
+import type { Property } from "csstype";
 
 export interface EditableBoxProps {
   mouseDown: boolean;
@@ -10,12 +10,12 @@ export interface Position {
   y: number;
 }
 
-export type AxisLC = 'x' | 'y';
-export type AxisUC = 'X' | 'Y';
+export type AxisLC = "x" | "y";
+export type AxisUC = "X" | "Y";
 
-export type Side = 'top' | 'bottom' | 'left' | 'right';
+export type Side = "top" | "bottom" | "left" | "right";
 
-export type ClientByAxis = 'clientX' | 'clientY';
+export type ClientByAxis = "clientX" | "clientY";
 
 export interface MoveBoxPayload {
   event: MouseEvent;
@@ -67,4 +67,11 @@ export interface OuterEditableBoxStyles extends EditableBoxStyles {
 
 export interface InnerEditableBoxStyles extends EditableBoxStyles {
   margin: Pixels;
+}
+
+export interface GridBorderColourStyles {
+  borderLeftColor: string | undefined;
+  borderRightColor: string | undefined;
+  borderTopColor: string | undefined;
+  borderBottomColor: string | undefined;
 }
