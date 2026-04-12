@@ -14,6 +14,7 @@ import type {
   ResizeBoxPayload,
   Side,
 } from "./types";
+import { createBorderColoursObject } from "../../../utils/createBorderColoursObj";
 import { moveBoxWithinGridByAxis } from "../../../utils/moveBoxWithinGridByAxis";
 import { isMouseInBounds } from "../../../utils/isMouseInBounds";
 import { draggableBoxPositionCheck } from "../../../utils/draggableBoxPositionCheck";
@@ -24,7 +25,6 @@ import {
   outerEditableBoxStyles,
   innerEditableBoxPositionStyles,
   innerEditableBoxBorderColours,
-  createBorderColoursObject,
 } from "./EditableBox.styles";
 
 let borderWidth = 0;
